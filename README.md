@@ -3,11 +3,15 @@
 > **"O que Brasília esconde, nossa IA revela."**
 
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Powered by LangChain](https://img.shields.io/badge/Powered%20by-LangChain-green.svg)](https://langchain.com/)
+[![API Status](https://img.shields.io/badge/API-Complete-brightgreen.svg)](#-api-endpoints)
 
-Sistema multi-agente de IA que transforma dados brutos do Portal da Transparência em investigações inteligentes, democratizando o acesso à informação pública através de processamento de linguagem natural de última geração.
+**Sistema multi-agente de IA com API REST completa** que transforma dados brutos do Portal da Transparência em investigações inteligentes, democratizando o acesso à informação pública através de processamento de linguagem natural de última geração.
+
+🔥 **NOVO**: API REST completa com endpoints para investigações, análises e relatórios em tempo real!
 
 ## 🎯 O Problema
 
@@ -30,11 +34,13 @@ $ cidadao investigate "contratos emergenciais sem licitação em cidades pequena
 
 ## 🚀 Features que Impressionam
 
-### 🧠 **Multi-Agent Intelligence**
+### 🧠 **Multi-Agent Intelligence** ✅ IMPLEMENTADO
 - **Master Agent**: Orquestra investigações com capacidade de auto-reflexão
 - **Investigator Agent**: Detecta anomalias com explicações em linguagem natural
 - **Analyst Agent**: Correlaciona dados e identifica padrões ocultos
 - **Reporter Agent**: Gera relatórios executivos automatizados
+- **Context Memory Agent**: Gerencia memória episódica e semântica
+- **Semantic Router**: Roteamento inteligente de consultas
 
 ### 💾 **Memória Contextual**
 - **Episódica**: Lembra de investigações recentes
@@ -60,7 +66,23 @@ Toda anomalia vem com explicação clara:
 - Quais as evidências
 - O que investigar next
 
-### 🛠️ **Developer-First**
+### 🛠️ **Developer-First** ✅ API COMPLETA
+
+**REST API poderosa:**
+```bash
+# Iniciar investigação
+curl -X POST "http://localhost:8000/api/v1/investigations/start" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "contratos emergenciais suspeitos", "data_source": "contracts"}'
+
+# Stream de resultados em tempo real
+curl "http://localhost:8000/api/v1/investigations/stream/{investigation_id}"
+
+# Gerar relatório
+curl -X POST "http://localhost:8000/api/v1/reports/generate" \
+  -H "Content-Type: application/json" \
+  -d '{"report_type": "executive_summary", "title": "Análise de Contratos 2024"}'
+```
 
 **CLI poderoso:**
 ```bash
@@ -98,12 +120,14 @@ graph LR
     G --> H[CLI/SDK/API Output]
 ```
 
-## 📊 Tecnologias
+## 📊 Tecnologias Implementadas
 
-- **AI/ML**: LangChain, Hugging Face, SHAP/LIME, Prophet
-- **Backend**: FastAPI, PostgreSQL, Redis, Celery
-- **Observability**: OpenTelemetry, Prometheus, Grafana
-- **Infrastructure**: Docker, GitHub Actions, S3
+- **AI/ML**: ✅ LangChain, Hugging Face, Groq, Together AI, SHAP/LIME
+- **Backend**: ✅ FastAPI completo, PostgreSQL, Redis, autenticação JWT
+- **API Features**: ✅ Streaming SSE, rate limiting, middleware de logging
+- **Multi-Agent**: ✅ Sistema completo com 6 agentes especializados
+- **Observability**: OpenTelemetry, Prometheus, Grafana (planejado)
+- **Infrastructure**: Docker, GitHub Actions, S3 (planejado)
 
 ## 🚦 Quick Start
 
@@ -121,23 +145,70 @@ pip install -e ".[dev]"
 cp .env.example .env
 # Add your API keys (Portal Transparência, Groq/Together)
 
-# Run
+# Run API Server
+python -m src.api.app
+# ou
+uvicorn src.api.app:app --reload
+
+# Acesse a documentação
+open http://localhost:8000/docs
+
+# Run CLI
 cidadao investigate "sua primeira investigação"
 ```
 
-## 📈 Impacto Real
+## 📈 Status de Implementação
 
-- **12.8M** registros analisados
-- **R$ 2.3B** em anomalias identificadas
-- **87%** de precisão na detecção
-- **3.2s** tempo médio de resposta
+### ✅ Completo
+- **API REST**: 15+ endpoints implementados
+- **Multi-Agents**: 6 agentes especializados
+- **LLM Integration**: 3 providers com fallback
+- **Real-time**: Streaming de resultados
+- **Auth**: JWT + API Key
+- **Docs**: OpenAPI/Swagger automático
+
+### 🔄 Em Desenvolvimento  
+- **Interface Web**: Frontend interativo
+- **Database**: Integração PostgreSQL/Redis
+- **WebSocket**: Comunicação bidirecional
+
+## 🌐 API Endpoints
+
+### 🏥 Health Check
+- `GET /health` - Status básico do sistema
+- `GET /health/detailed` - Informações detalhadas
+- `GET /health/live` - Kubernetes liveness probe
+- `GET /health/ready` - Kubernetes readiness probe
+
+### 🔍 Investigations
+- `POST /api/v1/investigations/start` - Iniciar investigação
+- `GET /api/v1/investigations/stream/{id}` - Stream em tempo real
+- `GET /api/v1/investigations/{id}/status` - Status da investigação
+- `GET /api/v1/investigations/{id}/results` - Resultados completos
+- `GET /api/v1/investigations/` - Listar investigações
+- `DELETE /api/v1/investigations/{id}` - Cancelar investigação
+
+### 📊 Analysis
+- `POST /api/v1/analysis/start` - Iniciar análise de padrões
+- `GET /api/v1/analysis/trends` - Análise de tendências
+- `GET /api/v1/analysis/correlations` - Análise de correlações
+- `GET /api/v1/analysis/patterns` - Detecção de padrões
+- `GET /api/v1/analysis/{id}/results` - Resultados completos
+
+### 📄 Reports
+- `POST /api/v1/reports/generate` - Gerar relatório
+- `GET /api/v1/reports/templates` - Templates disponíveis
+- `GET /api/v1/reports/{id}` - Obter relatório
+- `GET /api/v1/reports/{id}/download` - Download (HTML/MD/JSON)
+- `GET /api/v1/reports/` - Listar relatórios
 
 ## 🎯 Use Cases
 
-1. **Jornalistas**: Investigações data-driven em segundos
-2. **ONGs**: Monitoramento automático de gastos
-3. **Órgãos de Controle**: Detecção proativa de irregularidades
-4. **Cidadãos**: Acesso democrático à informação complexa
+1. **Jornalistas**: Investigações data-driven via API
+2. **Desenvolvedores**: Integração com sistemas existentes
+3. **ONGs**: Monitoramento automático de gastos
+4. **Órgãos de Controle**: Detecção proativa de irregularidades
+5. **Cidadãos**: Acesso democrático à informação complexa
 
 ## 🔒 Licença
 
@@ -153,6 +224,21 @@ Para licenciamento comercial ou parcerias: andersonhs27@gmail.com
 - 🔗 [LinkedIn](https://www.linkedin.com/in/anderson-h-silva95/)
 - 🐦 [X/Twitter](https://twitter.com/neural_thinker)
 - 📧 andersonhs27@gmail.com
+
+## 🚀 Deploy e Produção
+
+```bash
+# Docker
+docker build -t cidadao-ai .
+docker run -p 8000:8000 cidadao-ai
+
+# Kubernetes (em breve)
+kubectl apply -f k8s/
+
+# Monitoramento
+# OpenAPI docs: http://localhost:8000/docs
+# Health check: http://localhost:8000/health
+```
 
 ---
 
