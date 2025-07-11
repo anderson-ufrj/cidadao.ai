@@ -64,6 +64,10 @@ class Settings(BaseSettings):
     )
     transparency_api_timeout: int = Field(default=30, description="API timeout")
     transparency_api_max_retries: int = Field(default=3, description="Max retries")
+    transparency_api_header_key: str = Field(
+        default="chave-api-dados",
+        description="Portal da Transparência API header key name"
+    )
     
     # LLM Configuration
     llm_provider: str = Field(
