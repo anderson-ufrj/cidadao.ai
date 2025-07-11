@@ -795,3 +795,420 @@ ANALYST_CORRELATION_THRESHOLD=0.7
 ANALYST_TREND_SENSITIVITY=0.05
 ANALYST_LLM_PROVIDER=together
 ```
+
+---
+
+## 🎯 Casos de Uso
+
+### 1. Jornalismo Investigativo
+
+#### Cenário: Investigação de Contratos Emergenciais
+Um jornalista quer investigar contratos emergenciais suspeitos durante a pandemia.
+
+```bash
+# Investigação via CLI
+cidadao investigate "contratos emergenciais COVID-19 com preços inflacionados" \
+  --source contracts \
+  --date-range "2020-03-01,2022-12-31" \
+  --keywords "emergencial,COVID,pandemia" \
+  --min-value 100000 \
+  --anomaly-types price,vendor,temporal \
+  --explain
+
+# Gerar relatório jornalístico
+cidadao report generate \
+  --type investigation_report \
+  --title "Contratos Emergenciais na Pandemia" \
+  --target-audience journalist \
+  --format html \
+  --include-evidence
+```
+
+#### Resultado Esperado:
+- Lista de contratos com preços suspeitos
+- Explicações detalhadas das anomalias
+- Sugestões de investigação adicional
+- Relatório formatado para publicação
+
+### 2. Auditoria Governamental
+
+#### Cenário: Auditoria de Órgão Público
+Auditor interno precisa analisar gastos do Ministério da Saúde.
+
+```bash
+# Análise abrangente via API
+curl -X POST "http://localhost:8000/api/v1/analysis/start" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analysis_type": "organizational_behavior",
+    "data_source": "contracts",
+    "filters": {"codigo_orgao": "26000"},
+    "time_range": {"start": "2024-01-01", "end": "2024-12-31"},
+    "include_correlations": true,
+    "include_trends": true
+  }'
+
+# Gerar relatório de auditoria
+curl -X POST "http://localhost:8000/api/v1/reports/generate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "report_type": "audit_report",
+    "title": "Auditoria Ministério da Saúde 2024",
+    "target_audience": "technical",
+    "output_format": "markdown",
+    "include_raw_data": true
+  }'
+```
+
+### 3. ONGs e Transparência
+
+#### Cenário: Monitoramento Contínuo de Gastos
+ONG quer monitorar gastos educacionais continuamente.
+
+```bash
+# Configurar monitoramento
+cidadao watch \
+  --org "Ministério da Educação" \
+  --categories "educacao,ensino,escola" \
+  --threshold 0.85 \
+  --alert-webhook "https://ong.org/webhook/alerts" \
+  --frequency daily
+
+# Dashboard de transparência
+cidadao report generate \
+  --type transparency_dashboard \
+  --title "Dashboard Educação - $(date +%B\ %Y)" \
+  --data-sources contracts,expenses \
+  --target-audience general \
+  --format html \
+  --auto-update daily
+```
+
+### 4. Pesquisa Acadêmica
+
+#### Cenário: Estudo sobre Eficiência de Gastos Públicos
+Pesquisador quer analisar correlações entre gastos e resultados.
+
+```python
+import asyncio
+from cidadao_ai import CidadaoClient
+
+async def pesquisa_academica():
+    client = CidadaoClient()
+    
+    # Análise de correlações
+    correlations = await client.analyze_correlations(
+        variables=["valor_contrato", "prazo_execucao", "resultado_entrega"],
+        data_source="contracts",
+        time_range="2020-2024",
+        method="pearson"
+    )
+    
+    # Análise de eficiência
+    efficiency = await client.analyze_efficiency(
+        metric="custo_beneficio",
+        group_by="orgao",
+        period="quarterly"
+    )
+    
+    return {
+        "correlations": correlations,
+        "efficiency": efficiency
+    }
+
+# Executar pesquisa
+results = asyncio.run(pesquisa_academica())
+```
+
+### 5. Controle Social
+
+#### Cenário: Cidadão Verificando Gastos Locais
+Cidadão quer verificar gastos da prefeitura local.
+
+```bash
+# Investigação municipal via CLI
+cidadao investigate "gastos suspeitos prefeitura São Paulo" \
+  --scope municipal \
+  --location "São Paulo,SP" \
+  --categories obras,servicos \
+  --period 2024 \
+  --explain-citizen
+
+# Relatório cidadão
+cidadao report generate \
+  --type citizen_report \
+  --title "Gastos Públicos São Paulo 2024" \
+  --language simple \
+  --format html \
+  --include-graphics
+```
+
+---
+
+## 🔧 Solução de Problemas
+
+### Problemas Comuns e Soluções
+
+#### 1. Erro de Autenticação da API
+
+**Problema**: `401 Unauthorized` ao fazer requisições
+
+**Possíveis Causas**:
+- Chave de API inválida ou expirada
+- Header de autenticação mal formatado
+- Permissões insuficientes
+
+**Soluções**:
+```bash
+# Verificar chaves de API
+cidadao config show
+
+# Testar conectividade
+cidadao test-connection
+
+# Regenerar configuração
+cp .env.example .env
+# Editar .env com novas chaves
+
+# Verificar formato do header
+curl -H "X-API-Key: sua_chave_aqui" http://localhost:8000/health
+```
+
+#### 2. Rate Limit Excedido
+
+**Problema**: `429 Too Many Requests`
+
+**Soluções**:
+```bash
+# Verificar limites atuais
+curl -I http://localhost:8000/health
+
+# Aguardar reset (verificar header X-RateLimit-Reset)
+# Ou implementar backoff exponencial no código
+
+# Aumentar limites (se necessário)
+export RATE_LIMIT_PER_MINUTE=120
+export RATE_LIMIT_PER_HOUR=2000
+```
+
+#### 3. Timeout em Investigações
+
+**Problema**: Investigações demoram muito ou expiram
+
+**Soluções**:
+```bash
+# Aumentar timeout
+cidadao investigate "query" --timeout 300
+
+# Usar filtros mais específicos
+cidadao investigate "query" \
+  --date-range "2024-01-01,2024-01-31" \
+  --max-records 1000
+
+# Monitorar progresso via streaming
+curl "http://localhost:8000/api/v1/investigations/stream/{id}"
+```
+
+#### 4. Erro de Conexão com Portal da Transparência
+
+**Problema**: `502 Bad Gateway` ou timeouts
+
+**Soluções**:
+```bash
+# Verificar status do Portal
+curl -I https://api.portaldatransparencia.gov.br/api-de-dados/orgaos
+
+# Verificar chave de API
+curl -H "chave-api-dados: sua_chave" \
+  https://api.portaldatransparencia.gov.br/api-de-dados/orgaos
+
+# Configurar retry e backoff
+export TRANSPARENCY_API_RETRY_ATTEMPTS=5
+export TRANSPARENCY_API_BACKOFF_FACTOR=2
+```
+
+#### 5. Problemas de Memória/Performance
+
+**Problema**: Sistema lento ou com pouca memória
+
+**Soluções**:
+```bash
+# Limpar cache
+cidadao cache clear
+
+# Verificar uso de memória
+docker stats cidadao-ai  # Se usando Docker
+
+# Otimizar configurações
+export MAX_CONCURRENT_REQUESTS=10
+export CACHE_TTL=3600
+export MAX_RESULTS_PER_PAGE=100
+```
+
+### Logs e Debugging
+
+#### Habilitar Logs Detalhados
+
+```bash
+# Configurar nível de log
+export LOG_LEVEL=DEBUG
+
+# Logs em arquivo
+export LOG_FILE=/var/log/cidadao-ai.log
+
+# Logs estruturados
+export LOG_FORMAT=json
+```
+
+#### Verificar Logs
+
+```bash
+# Via CLI
+cidadao logs --tail 100 --level ERROR
+
+# Via Docker
+docker logs cidadao-ai --tail 100
+
+# Via arquivo
+tail -f /var/log/cidadao-ai.log | grep ERROR
+```
+
+#### Modo Debug
+
+```bash
+# Executar em modo debug
+python -m src.api.app --debug
+
+# Ou via uvicorn
+uvicorn src.api.app:app --reload --log-level debug
+```
+
+### Backup e Recuperação
+
+#### Backup de Dados
+
+```bash
+# Backup de configurações
+cp .env .env.backup
+
+# Backup de resultados (se usando banco local)
+pg_dump cidadao_ai > backup_$(date +%Y%m%d).sql
+
+# Backup de cache Redis
+redis-cli --rdb backup_redis_$(date +%Y%m%d).rdb
+```
+
+#### Recuperação de Dados
+
+```bash
+# Restaurar configurações
+cp .env.backup .env
+
+# Restaurar banco
+psql cidadao_ai < backup_20250124.sql
+
+# Restaurar cache Redis
+redis-cli --rdb backup_redis_20250124.rdb
+```
+
+---
+
+## ❓ Perguntas Frequentes
+
+### Instalação e Configuração
+
+**P: Quais são os requisitos mínimos do sistema?**
+R: Python 3.11+, 4GB RAM, 2GB de espaço em disco, conexão com internet para APIs externas.
+
+**P: Posso usar o sistema sem chaves de API de LLM?**
+R: Não, pelo menos uma chave de LLM (Groq, Together AI ou Hugging Face) é obrigatória para o funcionamento dos agentes de IA.
+
+**P: Como obtenho uma chave do Portal da Transparência?**
+R: Acesse https://api.portaldatransparencia.gov.br/, registre-se e solicite uma chave. O processo pode levar alguns dias para aprovação.
+
+**P: O sistema funciona offline?**
+R: Não completamente. O sistema precisa de conexão para acessar APIs externas (Portal da Transparência e LLMs), mas pode armazenar dados localmente para consultas posteriores.
+
+### Uso e Funcionalidades
+
+**P: Qual a diferença entre investigação e análise?**
+R: Investigação foca em detectar anomalias específicas, enquanto análise identifica padrões e tendências gerais nos dados.
+
+**P: Posso processar dados de múltiplos órgãos simultaneamente?**
+R: Sim, use filtros amplos ou execute investigações separadas para cada órgão e depois combine os resultados.
+
+**P: Como interpretar os scores de confiança?**
+R: Scores de 0.0-0.3 (baixa), 0.3-0.7 (média), 0.7-1.0 (alta confiança). Recomenda-se investigar anomalias com score > 0.7.
+
+**P: Os relatórios podem ser customizados?**
+R: Sim, há templates para diferentes audiências e você pode personalizar formato, seções e nível de detalhamento.
+
+### Performance e Limites
+
+**P: Quantos registros o sistema pode processar?**
+R: Depende da memória disponível, mas tipicamente processa centenas de milhares de registros. Para datasets maiores, use filtros para dividir em lotes.
+
+**P: Por que algumas investigações demoram muito?**
+R: Investigações complexas com muitos registros e múltiplos tipos de anomalia podem demorar. Use filtros mais específicos ou monitore via streaming.
+
+**P: Existe limite de requisições por dia?**
+R: Por padrão: 60/minuto, 1000/hora, 10000/dia. Esses limites podem ser ajustados conforme necessário.
+
+### Segurança e Privacidade
+
+**P: Os dados ficam armazenados no sistema?**
+R: Por padrão, apenas em cache temporário. Para persistência, configure banco de dados. Dados sensíveis nunca são logados.
+
+**P: O sistema é seguro para dados governamentais?**
+R: Sim, implementa autenticação JWT, rate limiting, logs de auditoria e pode ser deployado em ambiente isolado.
+
+**P: Como funciona a auditoria das operações?**
+R: Toda operação é logada com hash criptográfico, timestamp e rastreabilidade completa das ações.
+
+### Integração e Desenvolvimento
+
+**P: Posso integrar com outros sistemas?**
+R: Sim, via API REST completa com OpenAPI/Swagger. Suporta webhooks para notificações em tempo real.
+
+**P: Há SDK para outras linguagens além de Python?**
+R: Atualmente apenas Python nativo. Para outras linguagens, use a API REST diretamente.
+
+**P: Como contribuir com o desenvolvimento?**
+R: O projeto é proprietário atualmente. Para parcerias ou licenciamento, contate: andersonhs27@gmail.com
+
+### Solução de Problemas
+
+**P: O que fazer se a API retorna erro 500?**
+R: Verifique logs com `cidadao logs --level ERROR`, verifique conectividade das APIs externas e reinicie o serviço se necessário.
+
+**P: Como atualizar para nova versão?**
+R: `git pull origin main && pip install -e ".[dev]" --upgrade`. Sempre faça backup antes de atualizar.
+
+**P: Onde reportar bugs ou sugerir melhorias?**
+R: Abra uma issue no GitHub: https://github.com/anderson-ufrj/cidadao.ai/issues
+
+---
+
+## 📞 Suporte e Contato
+
+### Documentação Adicional
+- **API Reference**: `/docs` (quando servidor está rodando)
+- **GitHub**: https://github.com/anderson-ufrj/cidadao.ai
+- **Issues**: https://github.com/anderson-ufrj/cidadao.ai/issues
+
+### Contato do Desenvolvedor
+**Anderson H. Silva**  
+*Arquiteto de Inteligência Digital*
+
+- 📧 **Email**: andersonhs27@gmail.com
+- 🔗 **LinkedIn**: https://www.linkedin.com/in/anderson-h-silva95/
+- 🐦 **Twitter/X**: https://twitter.com/neural_thinker
+
+### Licenciamento e Parcerias
+Para questões de licenciamento comercial, parcerias ou implementações customizadas, entre em contato diretamente.
+
+---
+
+**© 2025 Anderson H. Silva. Todos os direitos reservados.**
+
+*Este manual foi gerado para a versão 1.0.0 do Cidadão.AI. Para a versão mais atualizada, consulte a documentação online.*
