@@ -23,8 +23,9 @@ async def test_api_connection():
     
     async with TransparencyAPIClient() as client:
         try:
-            # Test with a simple contract search
+            # Test with a simple contract search (requires codigoOrgao)
             filters = TransparencyAPIFilter(
+                codigo_orgao="26000",  # Ministério da Saúde
                 ano=2024,
                 mes=1,
                 pagina=1,
@@ -71,12 +72,29 @@ async def test_different_endpoints():
             try:
                 print(f"   Testing {endpoint_name}...")
                 
-                filters = TransparencyAPIFilter(
-                    ano=2024,
-                    mes=1,
-                    pagina=1,
-                    tamanho_pagina=3
-                )
+                # Different endpoints need different required params
+                if endpoint_name in ["contracts", "biddings"]:
+                    filters = TransparencyAPIFilter(
+                        codigo_orgao="26000",  # Required for contratos/licitacoes
+                        ano=2024,
+                        mes=1,
+                        pagina=1,
+                        tamanho_pagina=3
+                    )
+                elif endpoint_name == "agreements":
+                    filters = TransparencyAPIFilter(
+                        data_inicio="01/01/2024",
+                        data_fim="31/01/2024",
+                        pagina=1,
+                        tamanho_pagina=3
+                    )
+                else:
+                    filters = TransparencyAPIFilter(
+                        ano=2024,
+                        mes=1,
+                        pagina=1,
+                        tamanho_pagina=3
+                    )
                 
                 method = getattr(client, method_name)
                 response = await method(filters)
@@ -106,6 +124,7 @@ async def test_data_parsing():
     async with TransparencyAPIClient() as client:
         try:
             filters = TransparencyAPIFilter(
+                codigo_orgao="26000",  # Required for contracts
                 ano=2024,
                 mes=1,
                 pagina=1,

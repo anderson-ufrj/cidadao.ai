@@ -69,7 +69,8 @@ class TransparencyAPIFilter(BaseModel):
     data_fim: Optional[str] = PydanticField(default=None, description="End date (DD/MM/YYYY)")
     valor_inicial: Optional[float] = PydanticField(default=None, description="Minimum value")
     valor_final: Optional[float] = PydanticField(default=None, description="Maximum value")
-    orgao: Optional[str] = PydanticField(default=None, description="Organization code")
+    codigo_orgao: Optional[str] = PydanticField(default=None, description="Organization code (required for contratos/licitacoes)")
+    orgao: Optional[str] = PydanticField(default=None, description="Organization code (legacy)")
     cnpj_contratado: Optional[str] = PydanticField(default=None, description="Contracted CNPJ")
     modalidade: Optional[int] = PydanticField(default=None, description="Bidding modality")
     pagina: int = PydanticField(default=1, ge=1, description="Page number")
@@ -103,6 +104,11 @@ class TransparencyAPIFilter(BaseModel):
                     params["cnpjContratado"] = value
                 elif field == "tamanho_pagina":
                     params["tamanhoPagina"] = value
+                elif field == "codigo_orgao":
+                    params["codigoOrgao"] = value
+                elif field == "orgao":
+                    # Legacy support - convert to codigoOrgao
+                    params["codigoOrgao"] = value
                 else:
                     params[field] = value
         return params
@@ -382,7 +388,7 @@ class TransparencyAPIClient:
             Contracts data
         """
         params = filters.to_params() if filters else {}
-        data = await self._make_request("/contratos", params)
+        data = await self._make_request("/api-de-dados/contratos", params)
         return self._parse_response(data)
     
     async def get_expenses(
@@ -399,7 +405,7 @@ class TransparencyAPIClient:
             Expenses data
         """
         params = filters.to_params() if filters else {}
-        data = await self._make_request("/despesas", params)
+        data = await self._make_request("/api-de-dados/despesas", params)
         return self._parse_response(data)
     
     async def get_agreements(
@@ -416,7 +422,7 @@ class TransparencyAPIClient:
             Agreements data
         """
         params = filters.to_params() if filters else {}
-        data = await self._make_request("/convenios", params)
+        data = await self._make_request("/api-de-dados/convenios", params)
         return self._parse_response(data)
     
     async def get_biddings(
@@ -433,7 +439,7 @@ class TransparencyAPIClient:
             Biddings data
         """
         params = filters.to_params() if filters else {}
-        data = await self._make_request("/licitacoes", params)
+        data = await self._make_request("/api-de-dados/licitacoes", params)
         return self._parse_response(data)
     
     async def get_servants(
@@ -450,7 +456,7 @@ class TransparencyAPIClient:
             Servants data
         """
         params = filters.to_params() if filters else {}
-        data = await self._make_request("/servidores", params)
+        data = await self._make_request("/api-de-dados/servidores", params)
         return self._parse_response(data)
     
     async def search_data(

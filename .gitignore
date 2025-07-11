@@ -221,6 +221,12 @@ fine_tuning_data/
 grafana_data/
 prometheus_data/
 
-#claude
+# Claude
 .claude
-CLAUDE.md
+
+# Test scripts with API keys (keep only in local development)
+scripts/test_*.py
+scripts/simple_*.py
+
+# API testing outputs
+api_test_results.json
