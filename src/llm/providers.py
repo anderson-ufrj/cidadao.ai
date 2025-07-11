@@ -17,7 +17,7 @@ import httpx
 from pydantic import BaseModel, Field as PydanticField
 
 from src.core import get_logger, settings
-from src.core.exceptions import LLMError, RateLimitError
+from src.core.exceptions import LLMError, LLMRateLimitError
 
 
 class LLMProvider(str, Enum):
@@ -194,7 +194,7 @@ class BaseLLMProvider(ABC):
                 
                 raise LLMError(
                     f"Request timeout after {self.timeout} seconds",
-                    provider=self.__class__.__name__
+                    details={"provider": self.__class__.__name__}
                 )
             
             except Exception as e:
@@ -211,12 +211,12 @@ class BaseLLMProvider(ABC):
                 
                 raise LLMError(
                     f"Unexpected error: {str(e)}",
-                    provider=self.__class__.__name__
+                    details={"provider": self.__class__.__name__}
                 )
         
         raise LLMError(
             f"Failed after {self.max_retries + 1} attempts",
-            provider=self.__class__.__name__
+            details={"provider": self.__class__.__name__}
         )
     
     async def _handle_error_response(self, response: httpx.Response, attempt: int):
@@ -236,10 +236,9 @@ class BaseLLMProvider(ABC):
                 await asyncio.sleep(retry_after)
                 return
             
-            raise RateLimitError(
+            raise LLMRateLimitError(
                 "Rate limit exceeded",
-                provider=self.__class__.__name__,
-                retry_after=retry_after
+                details={"provider": self.__class__.__name__, "retry_after": retry_after}
             )
         
         else:
@@ -265,7 +264,7 @@ class BaseLLMProvider(ABC):
             
             raise LLMError(
                 error_msg,
-                provider=self.__class__.__name__
+                details={"provider": self.__class__.__name__}
             )
     
     async def _process_stream_response(self, response: httpx.Response) -> AsyncGenerator[Dict[str, Any], None]:
@@ -617,7 +616,7 @@ class LLMManager:
         
         raise LLMError(
             f"All LLM providers failed. Last error: {str(last_error)}",
-            provider="all"
+            details={"provider": "all"}
         )
     
     async def stream_complete(self, request: LLMRequest) -> AsyncGenerator[str, None]:
@@ -672,7 +671,7 @@ class LLMManager:
         
         raise LLMError(
             f"All LLM providers failed for streaming. Last error: {str(last_error)}",
-            provider="all"
+            details={"provider": "all"}
         )
     
     async def close(self):
