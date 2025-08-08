@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+from ..core.secret_manager import get_secret_manager, UserCredentials
+
 @dataclass
 class User:
     """User model"""
@@ -75,6 +77,64 @@ class AuthManager:
             }
             
         return users_db
+    
+    @classmethod
+    async def from_vault(cls, vault_enabled: bool = True):
+        """Create AuthManager instance with Vault-based user initialization"""
+        instance = cls.__new__(cls)  # Create instance without calling __init__
+        
+        if vault_enabled:
+            try:
+                # Get secret manager and user credentials
+                secret_manager = await get_secret_manager()
+                user_secrets = await secret_manager.get_secrets_schema("users")
+                
+                # Initialize JWT secret from Vault
+                jwt_result = await secret_manager.get_secret("jwt/secret_key")
+                if not jwt_result.found:
+                    raise ValueError("JWT_SECRET_KEY not found in Vault or environment")
+                
+                instance.secret_key = jwt_result.value
+                instance.algorithm = 'HS256'
+                instance.access_token_expire_minutes = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '30'))
+                instance.refresh_token_expire_days = int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS', '7'))
+                
+                # Initialize users from Vault
+                instance.users_db = {}
+                
+                if user_secrets:
+                    # Admin user
+                    if user_secrets.admin_email and user_secrets.admin_password:
+                        instance.users_db[user_secrets.admin_email] = {
+                            'id': 'admin_vault',
+                            'email': user_secrets.admin_email,
+                            'name': user_secrets.admin_name or 'Administrator',
+                            'password_hash': instance._hash_password(user_secrets.admin_password.get_secret_value()),
+                            'role': 'admin',
+                            'is_active': True,
+                            'created_at': datetime.utcnow()
+                        }
+                    
+                    # Analyst user
+                    if user_secrets.analyst_email and user_secrets.analyst_password:
+                        instance.users_db[user_secrets.analyst_email] = {
+                            'id': 'analyst_vault',
+                            'email': user_secrets.analyst_email,
+                            'name': user_secrets.analyst_name or 'Analyst',
+                            'password_hash': instance._hash_password(user_secrets.analyst_password.get_secret_value()),
+                            'role': 'analyst',
+                            'is_active': True,
+                            'created_at': datetime.utcnow()
+                        }
+                
+                return instance
+                
+            except Exception as e:
+                print(f"Vault initialization failed, falling back to standard init: {e}")
+                # Fall back to standard initialization
+                return cls()
+        else:
+            return cls()
     
     def _hash_password(self, password: str) -> str:
         """Hash password using bcrypt"""

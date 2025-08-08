@@ -128,6 +128,35 @@ services:
       - "1025:1025"  # SMTP server
       - "8025:8025"  # Web UI
 
+  # HashiCorp Vault (Secret Management)
+  vault:
+    image: vault:1.15
+    container_name: cidadao-vault
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_ROOT_TOKEN:?VAULT_ROOT_TOKEN is required}
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+      VAULT_ADDR: http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault_data:/vault/data
+      - vault_logs:/vault/logs
+      - ./vault/config:/vault/config:ro
+    command: 
+      - "vault"
+      - "server"
+      - "-dev"
+      - "-dev-root-token-id=${VAULT_ROOT_TOKEN:?VAULT_ROOT_TOKEN is required}"
+      - "-dev-listen-address=0.0.0.0:8200"
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
     driver: local
@@ -138,6 +167,10 @@ volumes:
   minio_data:
     driver: local
   chromadb_data:
+    driver: local
+  vault_data:
+    driver: local
+  vault_logs:
     driver: local
 
 networks:

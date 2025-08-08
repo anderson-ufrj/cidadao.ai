@@ -151,7 +151,7 @@ const config: Config = {
             },
             {
               label: 'Fundamentos Matemáticos',
-              to: '/docs/math/theorems',
+              to: '/docs/math/overview',
             },
           ],
         },
@@ -160,15 +160,15 @@ const config: Config = {
           items: [
             {
               label: 'Agentes Especializados',
-              to: '/docs/architecture/agents',
+              to: '/docs/agents/overview',
             },
             {
-              label: 'Roteamento Semântico',
-              to: '/docs/architecture/routing',
+              label: 'Sistema Multi-Agente',
+              to: '/docs/architecture/multi-agent-system',
             },
             {
-              label: 'Memória Contextual',
-              to: '/docs/architecture/memory',
+              label: 'Arquitetura do Sistema',
+              to: '/docs/architecture/overview',
             },
           ],
         },

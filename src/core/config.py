@@ -9,9 +9,15 @@ License: Proprietary - All rights reserved
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import asyncio
+import os
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Import will be available after initialization
+from .secret_manager import SecretManager
+from .vault_client import VaultConfig
 
 
 class Settings(BaseSettings):
@@ -280,11 +286,97 @@ class Settings(BaseSettings):
                 data[field] = "***REDACTED***"
         return data
 
+    @classmethod
+    async def from_vault(cls, vault_config: Optional[VaultConfig] = None) -> "Settings":
+        """
+        Create Settings instance with secrets loaded from Vault
+        
+        This method initializes a SecretManager with Vault integration
+        and loads secrets with proper fallback to environment variables.
+        """
+        # Create vault config from environment if not provided
+        if vault_config is None:
+            vault_config = VaultConfig(
+                url=os.getenv("VAULT_URL", "http://localhost:8200"),
+                token=os.getenv("VAULT_TOKEN"),
+                namespace=os.getenv("VAULT_NAMESPACE"),
+                secret_path=os.getenv("VAULT_SECRET_PATH", "secret/cidadao-ai"),
+                fallback_to_env=os.getenv("VAULT_FALLBACK_TO_ENV", "true").lower() == "true",
+                require_vault=os.getenv("VAULT_REQUIRE", "false").lower() == "true"
+            )
+        
+        # Initialize secret manager
+        secret_manager = SecretManager(vault_config)
+        await secret_manager.initialize()
+        
+        # Load all secret schemas
+        database_secrets = await secret_manager.get_secrets_schema("database")
+        jwt_secrets = await secret_manager.get_secrets_schema("jwt")
+        api_secrets = await secret_manager.get_secrets_schema("api_keys")
+        app_secrets = await secret_manager.get_secrets_schema("application")
+        redis_secrets = await secret_manager.get_secrets_schema("redis")
+        infra_secrets = await secret_manager.get_secrets_schema("infrastructure")
+        
+        # Build configuration data
+        config_data = {}
+        
+        # Core application
+        if app_secrets and app_secrets.secret_key:
+            config_data["secret_key"] = app_secrets.secret_key
+        
+        # JWT configuration
+        if jwt_secrets:
+            if jwt_secrets.secret_key:
+                config_data["jwt_secret_key"] = jwt_secrets.secret_key
+            config_data["jwt_algorithm"] = jwt_secrets.algorithm
+            config_data["jwt_access_token_expire_minutes"] = jwt_secrets.access_token_expire_minutes
+            config_data["jwt_refresh_token_expire_days"] = jwt_secrets.refresh_token_expire_days
+        
+        # Database configuration  
+        if database_secrets and database_secrets.url:
+            config_data["database_url"] = database_secrets.url
+        
+        # Redis configuration
+        if redis_secrets:
+            config_data["redis_url"] = redis_secrets.url
+            if redis_secrets.password:
+                config_data["redis_password"] = redis_secrets.password
+        
+        # API Keys
+        if api_secrets:
+            if api_secrets.transparency_api_key:
+                config_data["transparency_api_key"] = api_secrets.transparency_api_key
+            if api_secrets.groq_api_key:
+                config_data["groq_api_key"] = api_secrets.groq_api_key
+            if api_secrets.together_api_key:
+                config_data["together_api_key"] = api_secrets.together_api_key
+            if api_secrets.huggingface_api_key:
+                config_data["huggingface_api_key"] = api_secrets.huggingface_api_key
+        
+        # Create Settings instance with secrets
+        # Environment variables will still be used for non-secret configuration
+        settings = cls(**config_data)
+        
+        # Store reference to secret manager for cleanup
+        settings._secret_manager = secret_manager
+        
+        return settings
+    
+    async def close_vault_connection(self):
+        """Close Vault connection if it exists"""
+        if hasattr(self, '_secret_manager') and self._secret_manager:
+            await self._secret_manager.close()
+
 
 @lru_cache()
 def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings()
+
+
+async def get_settings_with_vault(vault_config: Optional[VaultConfig] = None) -> Settings:
+    """Get settings instance with Vault integration"""
+    return await Settings.from_vault(vault_config)
 
 
 # Global settings instance
