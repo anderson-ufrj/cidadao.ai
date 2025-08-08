@@ -38,8 +38,7 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str = Field(
-        default="postgresql://cidadao:cidadao123@localhost:5432/cidadao_ai",
-        description="Database connection URL"
+        description="Database connection URL (REQUIRED)"
     )
     database_pool_size: int = Field(default=10, description="DB pool size")
     database_pool_overflow: int = Field(default=20, description="DB pool overflow")
@@ -127,14 +126,12 @@ class Settings(BaseSettings):
         description="ChromaDB collection name"
     )
     
-    # Security
+    # Security - REQUIRED in production
     secret_key: SecretStr = Field(
-        default=SecretStr("your-super-secret-key-change-this-in-production"),
-        description="Application secret key"
+        description="Application secret key (REQUIRED)"
     )
     jwt_secret_key: SecretStr = Field(
-        default=SecretStr("your-jwt-secret-key-change-this"),
-        description="JWT secret key"
+        description="JWT secret key (REQUIRED)"
     )
     jwt_algorithm: str = Field(default="HS256", description="JWT algorithm")
     jwt_access_token_expire_minutes: int = Field(default=30, description="Access token expiry")

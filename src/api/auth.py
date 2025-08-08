@@ -27,32 +27,54 @@ class AuthManager:
     """Handles authentication and JWT token management"""
     
     def __init__(self):
-        self.secret_key = os.getenv('JWT_SECRET_KEY', 'cidadao-ai-secret-key-change-in-production')
+        # Security: JWT Secret Key is required
+        jwt_secret = os.getenv('JWT_SECRET_KEY')
+        if not jwt_secret:
+            raise ValueError("JWT_SECRET_KEY environment variable is required")
+        
+        self.secret_key = jwt_secret
         self.algorithm = 'HS256'
         self.access_token_expire_minutes = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '30'))
         self.refresh_token_expire_days = int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS', '7'))
         
-        # In-memory user store (replace with database in production)
-        self.users_db = {
-            'admin@cidadao.ai': {
-                'id': 'user_1',
-                'email': 'admin@cidadao.ai',
-                'name': 'Administrador',
-                'password_hash': self._hash_password('admin123'),
+        # Initialize user database from environment or create empty
+        self.users_db = self._initialize_users()
+    
+    def _initialize_users(self) -> Dict[str, Dict[str, Any]]:
+        """Initialize users from environment variables or return empty database"""
+        users_db = {}
+        
+        # Check for admin user from environment
+        admin_email = os.getenv('ADMIN_USER_EMAIL')
+        admin_password = os.getenv('ADMIN_USER_PASSWORD')
+        
+        if admin_email and admin_password:
+            users_db[admin_email] = {
+                'id': 'admin_1',
+                'email': admin_email,
+                'name': os.getenv('ADMIN_USER_NAME', 'Administrador'),
+                'password_hash': self._hash_password(admin_password),
                 'role': 'admin',
                 'is_active': True,
                 'created_at': datetime.utcnow()
-            },
-            'analyst@cidadao.ai': {
-                'id': 'user_2',
-                'email': 'analyst@cidadao.ai', 
-                'name': 'Analista',
-                'password_hash': self._hash_password('analyst123'),
+            }
+        
+        # Check for analyst user from environment  
+        analyst_email = os.getenv('ANALYST_USER_EMAIL')
+        analyst_password = os.getenv('ANALYST_USER_PASSWORD')
+        
+        if analyst_email and analyst_password:
+            users_db[analyst_email] = {
+                'id': 'analyst_1',
+                'email': analyst_email,
+                'name': os.getenv('ANALYST_USER_NAME', 'Analista'),
+                'password_hash': self._hash_password(analyst_password),
                 'role': 'analyst',
                 'is_active': True,
                 'created_at': datetime.utcnow()
             }
-        }
+            
+        return users_db
     
     def _hash_password(self, password: str) -> str:
         """Hash password using bcrypt"""
