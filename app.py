@@ -31,10 +31,52 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Prometheus metrics
-REQUEST_COUNT = Counter('cidadao_ai_requests_total', 'Total requests', ['method', 'endpoint'])
-REQUEST_DURATION = Histogram('cidadao_ai_request_duration_seconds', 'Request duration')
-INVESTIGATION_COUNT = Counter('cidadao_ai_investigations_total', 'Total investigations')
+# Prometheus metrics - prevent duplicate registration
+try:
+    REQUEST_COUNT = Counter('cidadao_ai_requests_total', 'Total requests', ['method', 'endpoint'])
+    REQUEST_DURATION = Histogram('cidadao_ai_request_duration_seconds', 'Request duration')
+    INVESTIGATION_COUNT = Counter('cidadao_ai_investigations_total', 'Total investigations')
+except ValueError as e:
+    # Handle duplicate registration by reusing existing metrics
+    if "Duplicated timeseries" in str(e):
+        logger.warning("Prometheus metrics already registered, reusing existing ones")
+        from prometheus_client.registry import REGISTRY
+        
+        # Initialize to None
+        REQUEST_COUNT = None
+        REQUEST_DURATION = None  
+        INVESTIGATION_COUNT = None
+        
+        # Find existing metrics in registry
+        for collector in list(REGISTRY._collector_to_names.keys()):
+            if hasattr(collector, '_name'):
+                # Counter metrics store name without _total suffix
+                if collector._name == 'cidadao_ai_requests':
+                    REQUEST_COUNT = collector
+                elif collector._name == 'cidadao_ai_request_duration_seconds': 
+                    REQUEST_DURATION = collector
+                elif collector._name == 'cidadao_ai_investigations':
+                    INVESTIGATION_COUNT = collector
+        
+        # If any metric wasn't found, raise the original error
+        if REQUEST_COUNT is None or REQUEST_DURATION is None or INVESTIGATION_COUNT is None:
+            logger.error("Could not find all existing metrics in registry")
+            raise e
+    else:
+        raise e
+except Exception as e:
+    logger.error(f"Failed to setup Prometheus metrics: {e}")
+    # Fallback: create mock objects to prevent application crash
+    class MockMetric:
+        def inc(self): pass
+        def labels(self, **kwargs): return self
+        def time(self): return self
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+    
+    REQUEST_COUNT = MockMetric()
+    REQUEST_DURATION = MockMetric() 
+    INVESTIGATION_COUNT = MockMetric()
 
 class HealthResponse(BaseModel):
     """Health check response model."""
