@@ -46,25 +46,11 @@ docker run -p 7860:7860 cidadao-ai-backend
 
 ## 🤖 Sistema Multi-Agente (16 Agentes Implementados)
 
-### 🏹 **Agentes Core**
-- **Zumbi dos Palmares** (Investigador) - Detecção de anomalias em contratos públicos
-- **Anita Garibaldi** (Analista) - Análise de padrões e correlações em dados governamentais
-- **Tiradentes** (Repórter) - Geração de relatórios em linguagem natural
-- **Abaporu** (Master Agent) - Orquestração e coordenação do sistema multi-agente
-- **Ayrton Senna** (Router Semântico) - Roteamento inteligente de consultas
-- **Nanã** (Memória) - Gestão de memória episódica, semântica e conversacional
-
-### 🎯 **Agentes Especializados**
-- **Machado de Assis** (Analista Textual) - Processamento de documentos e NLP
-- **José Bonifácio** (Analista de Políticas) - Avaliação de eficácia institucional
-- **Dandara** (Justiça Social) - Monitoramento de equidade e impacto social
-- **Carlos Drummond** (Comunicação) - Gestão de canais de comunicação
-- **Maria Quitéria** (Auditora de Segurança) - Proteção e auditoria do sistema
-- **Oscar Niemeyer** (Visualização) - Arquitetura e visualização de dados
-- **Ceuci** (ETL Specialist) - Processamento e integração de dados
-- **Obaluaê** (Monitor de Saúde) - Monitoramento de wellness e performance
-- **Lampião** (Analista Regional) - Insights territoriais e regionais
-- **Deodoro** (Framework Base) - Fundação para comunicação inter-agentes
+### 🏹 **Agente Principal - Zumbi dos Palmares (Investigador)**
+- **Especialização**: Detecção de anomalias em contratos públicos brasileiros
+- **Análise de preços suspeitos** com algoritmos estatísticos avançados
+- **Identificação de concentração de fornecedores** usando índice Herfindahl-Hirschman
+- **Padrões temporais** e correlações em licitações públicas
 
 ### 🧠 Capacidades do Sistema
 - ✅ **Sistema multi-agente** com coordenação hierárquica
@@ -74,7 +60,7 @@ docker run -p 7860:7860 cidadao-ai-backend
 - ✅ **Processamento de linguagem natural** para relatórios inteligentes
 - ✅ **Sistema de memória** episódica, semântica e conversacional
 - ✅ **Integração Portal da Transparência** com APIs governamentais
-- ✅ **Roteamento semântico** para otimização de consultas
+- ✅ **API REST** para integração com sistemas externos
 
 ## 📊 API Endpoints
 
@@ -107,13 +93,13 @@ curl -X POST "https://your-space-url.hf.space/api/agents/zumbi/investigate" \
 
 ### 🏗️ **Arquitetura**
 - **16 agentes IA especializados** com identidades culturais brasileiras
-- **Arquitetura hierárquica** com Master Agent (Abaporu) coordenando especialistas
+- **Arquitetura hierárquica** com Master Agent coordenando especialistas
 - **Pipeline ML estado-da-arte** com anomaly detection e análise temporal
 - **Sistema de memória multi-camadas** (episódica, semântica, conversacional)
 
 ### 🔒 **Segurança Enterprise-Grade**
 - **Autenticação multi-camadas** (JWT + OAuth2 + API Keys)
-- **Audit logging blockchain-style** com hash chain de integridade  
+- **Audit logging** com hash chain de integridade  
 - **Rate limiting** com Redis para proteção contra abuse
 - **Middleware de segurança** em todas as camadas da API
 - **Gestão de segredos** integrada com HashiCorp Vault
@@ -122,7 +108,7 @@ curl -X POST "https://your-space-url.hf.space/api/agents/zumbi/investigate" \
 - **Métricas Prometheus** customizadas para análises de transparência
 - **Logging estruturado JSON** com correlação de IDs
 - **Health checks** detalhados para todos os componentes
-- **Dashboards Grafana** pré-configurados para monitoramento
+- **Documentação automática** com OpenAPI/Swagger
 
 ### ⚡ **Performance & Escalabilidade**
 - **FastAPI async/await** para alta concorrência
@@ -157,12 +143,12 @@ curl -X POST "https://your-space-url.hf.space/api/agents/zumbi/investigate" \
 - **Latência**: <500ms para consultas interativas via API
 - **Confiabilidade**: 99.9% uptime target em produção
 
-### 📊 **Cobertura de Implementação** 
-- ✅ **Sistema Multi-Agente**: 16/16 agentes implementados (94% completo)
+### 📊 **Status de Implementação** 
+- ✅ **Sistema Multi-Agente**: 16 agentes implementados
 - ✅ **API REST**: 100% endpoints funcionais com documentação
 - ✅ **Pipeline ML**: Estado-da-arte para anomaly detection
-- ⚠️ **Testes**: Cobertura atual ~40% (Meta: >80%)
-- ✅ **Documentação**: Excepcional qualidade técnica bilíngue
+- ✅ **Containerização**: Docker pronto para deploy
+- ✅ **Documentação**: Qualidade técnica excepcional
 
 ## 🔗 Links Relacionados
 
