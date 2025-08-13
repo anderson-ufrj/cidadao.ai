@@ -76,12 +76,13 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Documentation markdown (keep main README)
-ARCHITECTURE.md
+# Internal documentation (moved to docs-internal/)
+docs-internal/
+.claude/
+
+# Documentation markdown (keep main README only)
 CHANGELOG.md
-ENTERPRISE_IMPROVEMENTS.md
-technical-report.md
-huggingface-optimization.md
+SECURITY.md
 
 # Deployment configs not needed in HF
 deployment/

@@ -1,0 +1,28 @@
+FROM grafana/grafana:10.2.3
+
+# Switch to root to copy files
+USER root
+
+# Copy Grafana provisioning configuration
+COPY grafana/provisioning /etc/grafana/provisioning
+COPY grafana/dashboards /var/lib/grafana/dashboards
+
+# Set permissions
+RUN chown -R grafana:grafana /etc/grafana/provisioning && \
+    chown -R grafana:grafana /var/lib/grafana/dashboards
+
+# Switch back to grafana user
+USER grafana
+
+# Environment variables for production
+ENV GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+ENV GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-changeme}
+ENV GF_USERS_ALLOW_SIGN_UP=false
+ENV GF_AUTH_ANONYMOUS_ENABLED=true
+ENV GF_AUTH_ANONYMOUS_ORG_NAME=Cidadão.AI
+ENV GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+ENV GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+ENV GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/cidadao-overview.json
+
+# Expose Grafana port
+EXPOSE 3000
