@@ -1,4 +1,4 @@
-"""Cidadão.AI - Sistema multi-agente de IA para transparência pública brasileira.
+"""CidadÃ£o.AI - Sistema multi-agente de IA para transparÃªncia pÃºblica brasileira.
 
 This package provides a comprehensive multi-agent AI system designed specifically
 for analyzing Brazilian government transparency data. Built with enterprise-grade
@@ -42,7 +42,7 @@ __version__ = "1.0.0"
 __author__ = "Anderson Henrique da Silva"
 __email__ = "andersonhs27@gmail.com"
 __license__ = "Proprietary - All rights reserved"
-__description__ = "Sistema multi-agente de IA para transparência pública brasileira"
+__description__ = "Sistema multi-agente de IA para transparÃªncia pÃºblica brasileira"
 
 # Key exports for external usage
 from src.core.config import get_settings

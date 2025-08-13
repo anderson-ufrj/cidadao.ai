@@ -76,9 +76,14 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Internal documentation (moved to docs-internal/)
+# Internal documentation - EXCLUDE FROM HF SPACES
 docs-internal/
 .claude/
+
+# Internal planning and next steps
+next_steps.md
+*next-steps*
+planning/
 
 # Documentation markdown (keep main README only)
 CHANGELOG.md

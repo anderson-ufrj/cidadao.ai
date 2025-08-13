@@ -20,6 +20,7 @@ from src.agents.deodoro import BaseAgent, AgentContext, AgentMessage
 from src.core import get_logger
 from src.core.exceptions import AgentExecutionError, DataAnalysisError
 from src.tools.transparency_api import TransparencyAPIClient, TransparencyAPIFilter
+from src.tools.models_client import ModelsClient, get_models_client
 from src.ml.spectral_analyzer import SpectralAnalyzer, SpectralAnomaly
 
 
@@ -84,7 +85,15 @@ class InvestigatorAgent(BaseAgent):
         self.duplicate_threshold = duplicate_similarity_threshold
         self.logger = get_logger(__name__)
         
-        # Initialize spectral analyzer for frequency-domain analysis
+        # Initialize models client for ML inference (only if enabled)
+        from src.core import settings
+        if settings.models_api_enabled:
+            self.models_client = get_models_client()
+        else:
+            self.models_client = None
+            self.logger.info("Models API disabled, using only local ML")
+        
+        # Initialize spectral analyzer for frequency-domain analysis (fallback)
         self.spectral_analyzer = SpectralAnalyzer()
         
         # Anomaly detection methods registry

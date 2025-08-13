@@ -233,7 +233,7 @@ fine_tuning_data/
 grafana_data/
 prometheus_data/
 
-# Internal documentation - KEEP IN REPOSITORY
+# Internal documentation - IGNORE FROM REPOSITORY
 docs-internal/
 
 # Claude Code - NEVER COMMIT

@@ -208,6 +208,16 @@ class Settings(BaseSettings):
     audit_log_retention_days: int = Field(default=90, description="Log retention days")
     audit_hash_algorithm: str = Field(default="sha256", description="Hash algorithm")
     
+    # Models API Configuration
+    models_api_enabled: bool = Field(default=True, description="Enable models API")
+    models_api_url: str = Field(
+        default="https://neural-thinker-cidadao-ai-models.hf.space",
+        description="Models API URL"
+    )
+    models_api_timeout: int = Field(default=30, description="Models API timeout seconds")
+    models_fallback_local: bool = Field(default=True, description="Use local ML as fallback")
+    models_circuit_breaker_failures: int = Field(default=3, description="Max failures before circuit break")
+    
     # ML Configuration
     anomaly_detection_threshold: float = Field(
         default=0.8,
